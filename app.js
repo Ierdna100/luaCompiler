@@ -3,8 +3,7 @@ const { watchForChanges } = require('./compileLua')
 
 const projectsFilePath = "./projects.json"
 
-
-    let projects = JSON.parse(fs.readFileSync(projectsFilePath))
+let projects = JSON.parse(fs.readFileSync(projectsFilePath))
 
 if (projects.length == 0)
 {

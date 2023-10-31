@@ -48,6 +48,10 @@ function compileLua()
             fs.appendFileSync(`${builddir}${buildfilename}`, data)
         }
     }
+
+    let currentTime = new Date()
+
+    console.log(`[${currentTime.toISOString}] Bundled the project!`)
 }
 
 module.exports = { watchForChanges }
