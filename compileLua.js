@@ -19,37 +19,35 @@ function onChange(eventName, filename)
 {
     if (filename.split(".")[1] == "lua")
     {
-        compileLua()
+        // debounce for Win32
+        if (lastUpdate + minTimeBetweenUpdates <= Date.now())
+        {
+            compileLua()
+        }
+
+        lastUpdate = Date.now()
     }
 }
 
 function compileLua()
 {
+    const dirToCompile = fs.readdirSync(srcdir)
+
     fs.writeFileSync(`${builddir}${buildfilename}`, "--\n", 'utf-8')
 
-    // debounce for Win32
-    if (lastUpdate + minTimeBetweenUpdates <= Date.now())
+    for (filename of dirToCompile)
     {
-        const dirToCompile = fs.readdirSync(srcdir)
+        fileMetadata = fs.lstatSync(`${srcdir}${filename}`)
 
-        for (filename of dirToCompile)
+        if (fileMetadata.isFile())
         {
-            fileMetadata = fs.lstatSync(`${srcdir}${filename}`)
+            let data = `-- ${filename}\n` 
+            data += fs.readFileSync(`${srcdir}${filename}`)
+            data += "\n"
 
-            if (fileMetadata.isFile())
-            {
-                let data = `-- ${filename}\n\n` 
-                data += fs.readFileSync(`${srcdir}${filename}`)
-                data += "\n\n"
-
-                fs.appendFileSync(`${builddir}${buildfilename}`, data)
-
-                console.log("ran")
-            }
+            fs.appendFileSync(`${builddir}${buildfilename}`, data)
         }
     }
-
-    lastUpdate = Date.now()
 }
 
 module.exports = { watchForChanges }
