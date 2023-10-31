@@ -24,8 +24,6 @@ function onChange(eventName, filename)
         {
             compileLua()
         }
-
-        lastUpdate = Date.now()
     }
 }
 
@@ -50,8 +48,9 @@ function compileLua()
     }
 
     let currentTime = new Date()
+    lastUpdate = currentTime.getTime()
 
-    console.log(`[${currentTime.toISOString}] Bundled the project!`)
+    console.log(`[${currentTime.toISOString()}] Bundled the project!`)
 }
 
 module.exports = { watchForChanges }
