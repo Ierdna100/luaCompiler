@@ -5,12 +5,6 @@ const projectsFilePath = "./projects.json"
 
 let projects = JSON.parse(fs.readFileSync(projectsFilePath))
 
-if (projects.length == 0)
-{
-    console.log("No projects exist in the JSON! Please specify at least one project")
-    process.exit(1)
-}
-
 switch (process.argv[2])
 {
     case undefined:
@@ -60,6 +54,12 @@ switch (process.argv[2])
         process.exit(0)
     case "remove":
     case "rm":
+        if (projects.length == 0)
+        {
+            console.log("No projects exist in the JSON! Please specify at least one project")
+            process.exit(1)
+        }
+
         if (process.argv[3] == undefined)
         {
             console.log("No project name specified! Please read the README!")
@@ -86,6 +86,12 @@ switch (process.argv[2])
         console.log(`No projects found with name ${process.argv[3]}`)
         process.exit(1)
     default:
+        if (projects.length == 0)
+        {
+            console.log("No projects exist in the JSON! Please specify at least one project")
+            process.exit(1)
+        }
+
         let projectExists = false
         for (let project of projects)
         {
