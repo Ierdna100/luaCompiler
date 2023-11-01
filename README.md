@@ -6,7 +6,7 @@ A project in this case refers to a directory that is the "source code" and a har
 
 # Usage:
 
-To add a project, run:
+To add a project, or update a project's directories or build filename, run:
 
 ```
 npm run add [PROJECT NAME] [SOURCE DIRECTORY] [BUILD DIRECTORY] [BUILD FILENAME]
