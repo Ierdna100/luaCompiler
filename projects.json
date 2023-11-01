@@ -1,8 +1,0 @@
-[
-	{
-		"name": "example",
-		"srcdir": "./test/",
-		"builddir": "./build/",
-        "buildfilename": "test.lua"
-	}
-]

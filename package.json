@@ -4,7 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "run": "node app.js"
+    "watch": "node watch.js",
+    "rm": "node rmProject.js",
+    "add": "node addProject.js"
   },
   "author": "",
   "license": "ISC"
