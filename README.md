@@ -4,6 +4,9 @@ This little script bundles a bunch of `.lua` files into one big one. I made it f
 
 A project in this case refers to a directory that is the "source code" and a hard-coded destination you define for each one, so you can edit multiple addons.
 
+# Initialization:
+1. run `npm install`
+
 # Usage:
 
 To add a project, or update a project's config, run:
