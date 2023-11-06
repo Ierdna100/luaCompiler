@@ -6,15 +6,10 @@ A project in this case refers to a directory that is the "source code" and a har
 
 # Usage:
 
-To add a project, or update a project's directories or build filename, run:
+To add a project, or update a project's config, run:
 
 ```
-npm run add [PROJECT NAME] [SOURCE DIRECTORY] [BUILD DIRECTORY] [BUILD FILENAME]
-```
-
-e.g.:
-```
-npm run add myProject ~/src/ ~/build/ build.lua
+npm run add
 ```
 
 To remove a project, run:
@@ -40,4 +35,4 @@ npm run watch myProject
 ```
 
 ## Compiler flags:
-`--ignore-comments`: Removes comments
+`--ignore-comments`: Removes comments if set on first line

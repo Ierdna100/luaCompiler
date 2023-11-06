@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { watchForChanges } = require('./compileLua')
+const { watchForChanges } = require('./projectManager/compileLua')
 
 const projectsFilePath = "./projects.json"
 
@@ -17,7 +17,8 @@ for (let project of projects)
     if (project.name == process.argv[2])
     {
         console.log(`Watching for changes in directory ${project.srcdir}`)
-        watchForChanges(project.srcdir, project.builddir, project.buildfilename)
+
+        watchForChanges(project.srcdir, project.builddir, project.buildFilename)
         
         projectExists = true
         break

@@ -1,8 +1,14 @@
 [
 	{
-		"name": "srs",
-		"srcdir": "D:/code/Lua/Stormworks addons/StormworksRailwaysSignalling/",
-		"builddir": "C:/Users/ierdn/AppData/Roaming/Stormworks/data/missions/StormworksRailwaySignalling/",
-		"buildfilename": "script.lua"
+		"name": "testingLua",
+		"srcdir": "D:\\code\\Lua\\LuaCompilerTesting\\src",
+		"builddir": "D:\\code\\Lua\\LuaCompilerTesting\\build",
+		"buildFilename": "building.lua"
+	},
+	{
+		"name": "testingLua2",
+		"srcdir": "D:\\code\\Lua\\LuaCompilerTesting\\src",
+		"builddir": "D:\\code\\Lua\\LuaCompilerTesting\\build",
+		"buildFilename": "build.lua"
 	}
 ]

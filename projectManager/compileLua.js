@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { createConfigFile, getFilesToIgnore } = require('./configFileManager')
 
 const minTimeBetweenUpdates = 2000
 
@@ -22,6 +23,7 @@ function onChange(eventName, filename)
         // debounce for Win32
         if (lastUpdate + minTimeBetweenUpdates <= Date.now())
         {
+            createConfigFile(srcdir)
             compileLua()
         }
     }
@@ -30,22 +32,35 @@ function onChange(eventName, filename)
 function compileLua()
 {
     const dirToCompile = fs.readdirSync(srcdir)
+    const filesToIgnore = getFilesToIgnore(srcdir)
 
-    fs.writeFileSync(`${builddir}${buildfilename}`, "", 'utf-8')
+    fs.writeFileSync(`${builddir}\\${buildfilename}`, "", 'utf-8')
 
     for (filename of dirToCompile)
     {
         if (!filename.includes(".lua")) continue
+
+        let nextFile = false
+        for (const ignoreFilename of filesToIgnore)
+        {
+            if (filename == ignoreFilename) 
+            {
+                nextFile = true
+                break
+            }
+        }
+
+        if (nextFile) continue
         
-        fileMetadata = fs.lstatSync(`${srcdir}${filename}`)
+        fileMetadata = fs.lstatSync(`${srcdir}\\${filename}`)
 
         if (fileMetadata.isFile())
         {
-            filedata = fs.readFileSync(`${srcdir}${filename}`).toString()
+            filedata = fs.readFileSync(`${srcdir}\\${filename}`).toString()
             
             let writedata = ""
 
-            if (filedata[0] == "--ignore-comments") 
+            if (filedata.substr(0, 17) == "--ignore-comments") 
             {
                 filedata = filedata.split("\r\n")
 
@@ -89,7 +104,7 @@ function compileLua()
             data += writedata
             data += "\n"
 
-            fs.appendFileSync(`${builddir}${buildfilename}`, data)
+            fs.appendFileSync(`${builddir}\\${buildfilename}`, data)
         }
     }
 

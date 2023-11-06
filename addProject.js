@@ -1,83 +1,75 @@
-const fs = require('fs')
+const fs = require('fs');
+const prompt = require('prompt-sync')();
+const { formatDirectorySeparator, formatBuildFilename } = require("./utils/fileFormatter.js");
+const { quitOnCtrlC } = require('./utils/commandLineQuit.js');
+const { createConfigFile } = require('./projectManager/configFileManager.js');
 
-const projectsFilePath = "./projects.json"
+const projectsFilePath = "./projects.json";
 
-let projects = []
+let projects = [];
+let projectExistsAtIndex = -1;
 
+// Creates projects.json if doesn't already exist
 try {
-    projects = JSON.parse(fs.readFileSync(projectsFilePath))
+    projects = JSON.parse(fs.readFileSync(projectsFilePath));
 } catch (e) {
-    fs.writeFileSync(projectsFilePath, "")
+    fs.writeFileSync(projectsFilePath, "");
 }
 
-if (process.argv[2] == undefined)
+const newProjectName = quitOnCtrlC(prompt("New project file name: "));
+
+let index = 0
+for (const project of projects)
 {
-    console.log("No project name specified! Please read the README!")
-    process.exit(1)
-}
-
-if (process.argv[3] == undefined)
-{
-    console.log("No source directory specified! Please read the README!")
-    process.exit(1)
-}
-
-if (process.argv[4] == undefined)
-{
-    console.log("No build directory specified! Please read the README!")
-    process.exit(1)
-}
-
-if (process.argv[5] == undefined)
-{
-    console.log("No build filename specified! Please read the README!")
-    process.exit(1)
-}
-
-let buildfilename = ""
-
-process.argv[3] = process.argv[3].replaceAll("\\\\", "\\").replaceAll("\\", "/")
-let lastChar = process.argv[3].charAt(process.argv[3].length - 1)
-if (lastChar != "/") process.argv[3] += "/"
-
-process.argv[4] = process.argv[4].replaceAll("\\\\", "\\").replaceAll("\\", "/")
-lastChar = process.argv[4].charAt(process.argv[4].length - 1)
-if (lastChar != "/") process.argv[4] += "/"
-
-if (process.argv[5].includes(".")) {
-    buildfilename = `${process.argv[5].split(".")[0]}.lua`
-}
-
-let projectAlreadyExists = false
-let existsAtIndex = 0
-for (let project of projects)
-{
-    if (project.name == process.argv[2])
+    if (project.name == newProjectName)
     {
-        projectAlreadyExists = true
-        break
+        if (prompt("Project with that name already exists. Do you want to replace it (Y/N): ")
+            .toLowerCase().charAt(0) != "y")
+        {
+            process.exit(0);
+        }
+
+        projectExistsAtIndex = index;
+        break;
     }
-    existsAtIndex++
+
+    index++;
 }
 
-let newProject = {
-    name: process.argv[2],
-    srcdir: process.argv[3],
-    builddir: process.argv[4],
-    buildfilename: buildfilename
-}
+let sourceDirectory = "";
+let buildDirectory = "";
+let buildFilename = "";
 
-if (projectAlreadyExists) 
+// If project already exists
+if (projectExistsAtIndex != -1)
 {
-    projects[existsAtIndex] = newProject
-} else 
+    currentProject = projects[projectExistsAtIndex];
+
+    sourceDirectory = formatDirectorySeparator(quitOnCtrlC(prompt(`Source directory of project (${currentProject.srcdir}): `)));
+    buildDirectory = formatDirectorySeparator(quitOnCtrlC(prompt(`Build directory of project (${currentProject.builddir}): `)));
+    buildFilename = formatBuildFilename(quitOnCtrlC(prompt(`Build filename (${currentProject.buildFilename}): `)));
+
+    projects[projectExistsAtIndex] = {
+        name: newProjectName,
+        srcdir: sourceDirectory == "" ? currentProject.srcdir : sourceDirectory,
+        builddir: buildDirectory == "" ? currentProject.builddir : buildDirectory,
+        buildFilename: buildFilename == ".lua" ? currentProject.buildFilename : buildFilename
+    };
+}
+else
 {
-    projects.push(newProject)
+    sourceDirectory = formatDirectorySeparator(quitOnCtrlC(prompt("Source directory of project: ")));
+    buildDirectory = formatDirectorySeparator(quitOnCtrlC(prompt("Build directory of project: ")));
+    buildFilename = formatBuildFilename(quitOnCtrlC(prompt("Build filename: ")));
+
+    createConfigFile(sourceDirectory);
+
+    projects.push({
+        name: newProjectName,
+        srcdir: sourceDirectory,
+        builddir: buildDirectory,
+        buildFilename: buildFilename
+    });
 }
 
-fs.writeFileSync(projectsFilePath, JSON.stringify(projects, null, "\t"))
-
-if (!projectAlreadyExists) console.log(`Successfully added project with name ${process.argv[2]}`)
-else console.log(`Successfully updated project with name ${process.argv[2]}`)
-
-process.exit(0)
+fs.writeFileSync(projectsFilePath, JSON.stringify(projects, null, "\t"));
