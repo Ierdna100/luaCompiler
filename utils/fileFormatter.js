@@ -11,7 +11,7 @@ function formatDirectorySeparator(rawInput) {
 
 function formatBuildFilename(rawInput) {
     if (rawInput.includes(".")) {
-        return `${process.argv[5].split(".")[0]}.lua`;
+        return `${rawInput.split(".")[0]}.lua`;
     }
 
     return rawInput + ".lua";
