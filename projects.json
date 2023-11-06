@@ -1,8 +1,8 @@
 [
 	{
-		"name": "example",
-		"srcdir": "./test/",
-		"builddir": "./build/",
-        "buildfilename": "test.lua"
+		"name": "srs",
+		"srcdir": "D:/code/Lua/Stormworks addons/StormworksRailwaysSignalling/",
+		"builddir": "C:/Users/ierdn/AppData/Roaming/Stormworks/data/missions/StormworksRailwaySignalling/",
+		"buildfilename": "script.lua"
 	}
 ]

@@ -38,3 +38,6 @@ e.g.:
 ```
 npm run run myProject
 ```
+
+## Compiler flags:
+`--ignore-comments`: Removes comments
