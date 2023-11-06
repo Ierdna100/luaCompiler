@@ -40,7 +40,7 @@ npm run watch myProject
 ## Compiler flags:
 `--ignore-comments`: Removes comments if set on first line
 
-# `luaConfig.json`
+## `luaConfig.json`
 
 In every project, a `luaConfig.json` file will be created. This allows you to ignore certain files you do not want compiled. Example `luaConfig.json`:
 
@@ -53,6 +53,6 @@ In every project, a `luaConfig.json` file will be created. This allows you to ig
 }
 ```
 
-# Limitations
+## Limitations
 
 This project cannot bundle files that are nested in other directories other than the source. Maybe will add later, for the moment I really don't see a purpose for this.
