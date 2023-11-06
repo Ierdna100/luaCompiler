@@ -14,7 +14,7 @@ To add a project, or update a project's config, run:
 ```
 npm run add
 ```
-
+___
 To remove a project, run:
 ```
 npm run rm [PROJECT NAME]
