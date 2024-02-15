@@ -12,13 +12,16 @@ function createConfigFile(directory)
     }
 
     fs.writeFileSync(`${directory}\\luaConfig.json`, JSON.stringify({
-        ignoreFiles: []
+        ignoreFiles: [],
+        ignoreComments: false,
+        deleteSpaces: true
     }, null, "\t"))
 }
 
-function getFilesToIgnore(directory)
+function getConfig(directory)
 {
-    return JSON.parse(fs.readFileSync(`${directory}\\luaConfig.json`)).ignoreFiles;
+    const config = JSON.parse(fs.readFileSync(`${directory}\\luaConfig.json`));
+    return config
 }
 
-module.exports = { createConfigFile, getFilesToIgnore }
+module.exports = { createConfigFile, getConfig }

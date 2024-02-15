@@ -54,7 +54,3 @@ In every project, a `luaConfig.json` file will be created. This allows you to ig
 	]
 }
 ```
-
-## Limitations
-
-This project cannot bundle files that are nested in other directories other than the source. Maybe will add later, for the moment I really don't see a purpose for this.

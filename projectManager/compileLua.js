@@ -1,117 +1,148 @@
 const fs = require('fs')
-const { createConfigFile, getFilesToIgnore } = require('./configFileManager')
+const { createConfigFile, getConfig } = require('./configFileManager')
 
 const minTimeBetweenUpdates = 2000
 
-let builddir = ""
-let srcdir = ""
-let buildfilename = ""
-let lastUpdate = 0
-
-function watchForChanges(watchDir, buildDir, buildFilename)
-{
-    builddir = buildDir
-    srcdir = watchDir
-    buildfilename = buildFilename
-    fs.watch(watchDir, onChange)
-}
-
-function onChange(eventName, filename)
-{
-    if (filename.split(".")[1] == "lua")
+class LuaCompiler {
+    constructor(watchDir, buildDir, buildFilename)
     {
-        // debounce for Win32
-        if (lastUpdate + minTimeBetweenUpdates <= Date.now())
-        {
-            createConfigFile(srcdir)
-            compileLua()
-        }
+        this.builddir = buildDir
+        this.lastUpdate = 0
+        this.srcdir = watchDir
+        this.buildfilename = buildFilename
+
+        createConfigFile(this.srcdir)
+        this.config = getConfig(this.srcdir)
+
+        fs.watch(watchDir, (eventName, filename) => this.onChange(filename))
     }
-}
 
-function compileLua()
-{
-    const dirToCompile = fs.readdirSync(srcdir)
-    const filesToIgnore = getFilesToIgnore(srcdir)
-
-    fs.writeFileSync(`${builddir}\\${buildfilename}`, "", 'utf-8')
-
-    for (filename of dirToCompile)
+    onChange(filename)
     {
-        if (!filename.includes(".lua")) continue
-
-        let nextFile = false
-        for (const ignoreFilename of filesToIgnore)
+        if (filename.split(".")[1] == "lua")
         {
-            if (filename == ignoreFilename) 
+            // debounce for Win32
+            if (this.lastUpdate + minTimeBetweenUpdates <= Date.now())
             {
-                nextFile = true
-                break
+                this.compileLua()
             }
         }
+        if (filename == "luaConfig.json") {
+            this.config = getConfig(this.srcdir)
+        }
+    }
 
-        if (nextFile) continue
-        
-        fileMetadata = fs.lstatSync(`${srcdir}\\${filename}`)
+    compileLua()
+    {
+        fs.writeFileSync(`${this.builddir}\\${this.buildfilename}`, "", 'utf-8')
+
+        this.compileLuaForFiles(this.srcdir)
+
+        let currentTime = new Date()
+        this.lastUpdate = currentTime.getTime()
+
+        console.log(`[${currentTime.toISOString()}] Bundled the project!`)
+    }
+
+    compileLuaForFiles(dirToCompile) {
+        const contentsOfDir = fs.readdirSync(dirToCompile)
+
+        for (const filename of contentsOfDir)
+        {
+            let ignoreFile = false
+            for (const ignoreFilename of this.config.ignoreFiles)
+            {
+                if (filename == ignoreFilename) 
+                {
+                    ignoreFile = true
+                }
+            }
+
+            if (!ignoreFile) {
+                this.getCodeNextFile(dirToCompile, filename)
+            }
+        }
+    }
+
+    getCodeNextFile(folder, filename) {
+        let fileMetadata = fs.lstatSync(`${folder}\\${filename}`)
 
         if (fileMetadata.isFile())
         {
-            filedata = fs.readFileSync(`${srcdir}\\${filename}`).toString()
-            
-            let writedata = ""
+            if (!filename.includes(".lua")) {
+                return;
+            } 
 
-            if (filedata.substr(0, 17) == "--ignore-comments") 
-            {
-                filedata = filedata.split("\r\n")
+            let filedata = fs.readFileSync(`${folder}\\${filename}`).toString()
+        
+            let parser = new WritedataParser(this.config)
 
-                let isBlockComment = false
-                for (let line of filedata)
-                {
-                    if (isBlockComment)
-                    {
-                        if (line.includes("]]"))
-                        {
-                            isBlockComment = false
-                            writedata += line.split("]]")[1]
-                            writedata += "\n"
-                        }
-
-                        continue
-                    }
-                    if (line.includes("--[[")) 
-                    {
-                        isBlockComment = true
-                        continue
-                    }
-                    // Whole line is comment
-                    if (line.substr(0, 2) == "--") continue
-                    if (line.includes("--")) 
-                    {
-                        writedata += line.split("--")[0]
-                        writedata += "\n"
-                        continue
-                    }
-
-                    writedata += line
-                    writedata += "\n"
-                }
-            } else
-            {
-                writedata = filedata
+            for (const line of filedata.split("\r\n")) {
+                parser.generateWriteDataFromLine(line)
             }
 
-            let data = `-- ${filename}\n` 
-            data += writedata
-            data += "\n"
+            let data = `-- ${filename}\n${parser.writedata}\n`
 
-            fs.appendFileSync(`${builddir}\\${buildfilename}`, data)
+            fs.appendFileSync(`${this.builddir}\\${this.buildfilename}`, data)
+        }
+        else if (fileMetadata.isDirectory()) {
+            this.compileLuaForFiles(`${folder}\\${filename}`)
         }
     }
-
-    let currentTime = new Date()
-    lastUpdate = currentTime.getTime()
-
-    console.log(`[${currentTime.toISOString()}] Bundled the project!`)
 }
 
-module.exports = { watchForChanges }
+class WritedataParser {
+    constructor(config) {
+        this.ignoreComments = config.ignoreComments
+        this.compress = config.deleteSpaces
+        this.writedata = ""
+        this.isBlockComment = false;
+    }
+
+    generateWriteDataFromLine(lineIn) {
+        let line = lineIn
+
+        if (this.compress) {
+            line = lineIn.trim()
+        }
+
+        if (this.compress && line == "") {
+            return
+        }
+
+        if (this.ignoreComments && this.isBlockComment)
+        {
+            if (line.includes("]]"))
+            {
+                this.isBlockComment = false
+                this.generateWriteDataFromLine(line.substring(line.indexOf("]]") + 2))
+                return;
+            }
+        }
+
+        if (this.isBlockComment) {
+            return;
+        }
+
+        if (this.ignoreComments && line.includes("--[[")) 
+        {
+            this.generateWriteDataFromLine(line.substring(0, line.indexOf("--[[")))
+            this.isBlockComment = true
+            this.generateWriteDataFromLine(line.substring(line.indexOf("--[[") + 4))
+            return
+        }
+
+        if (this.ignoreComments && line.includes("--")) 
+        {
+            let temp = line.split("--", 2)[0]
+            if (temp != "") {
+                this.writedata += `${temp}\n`
+            }
+            return
+        }
+
+        this.writedata += `${line}\n`
+    }
+}
+
+module.exports = { LuaCompiler }
