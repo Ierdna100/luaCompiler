@@ -48,9 +48,14 @@ In every project, a `luaConfig.json` file will be created. This allows you to ig
 
 ```json
 {
+	// Files to be ignore upon bundling
 	"ignoreFiles": [
 		"file1.lua",
         "file2.lua"
-	]
+	],
+	// True if ignoring all comments upon bundling
+	"ignoreComments": true,
+	// True if you wish to remove all empty lines and tabs
+	"deleteSpaces": false
 }
 ```
